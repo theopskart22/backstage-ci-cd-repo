@@ -61,7 +61,7 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           APP_NAME: ${{ env.APP_NAME }}
         run: |
-          ssh $EC2_USER@$EC2_HOST << 'EOF'
+          ssh $EC2_USER@$EC2_HOST << EOF
           set -x
           # Print environment variables for debugging
           echo "EC2_USER=$EC2_USER"
@@ -74,27 +74,27 @@ jobs:
           fi
 
           # Remove old app directory if it exists
-          if [ -d "~/apps/$APP_NAME" ]; then
-            rm -rf "~/apps/$APP_NAME"
+          if [ -d "/home/$EC2_USER/apps/$APP_NAME" ]; then
+            rm -rf "/home/$EC2_USER/apps/$APP_NAME"
           fi
 
           # Create the application directory
-          mkdir -p ~/apps/$APP_NAME
+          mkdir -p "/home/$EC2_USER/apps/$APP_NAME"
 
           # Verify directory creation
-          if [ ! -d "~/apps/$APP_NAME" ]; then
-            echo "Failed to create directory ~/apps/$APP_NAME"
+          if [ ! -d "/home/$EC2_USER/apps/$APP_NAME" ]; then
+            echo "Failed to create directory /home/$EC2_USER/apps/$APP_NAME"
             exit 1
           fi
 
           # Unzip the new code into the application directory
-          unzip -o ~/react-app.zip -d ~/apps/$APP_NAME
+          unzip -o ~/react-app.zip -d "/home/$EC2_USER/apps/$APP_NAME"
 
           # Change ownership to ec2-user
-          sudo chown -R ec2-user:ec2-user ~/apps/$APP_NAME
+          sudo chown -R ec2-user:ec2-user "/home/$EC2_USER/apps/$APP_NAME"
 
           # Navigate to the app directory and install dependencies
-          cd ~/apps/$APP_NAME
+          cd "/home/$EC2_USER/apps/$APP_NAME"
           npm install
 
           # Start the application
