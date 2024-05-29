@@ -99,5 +99,6 @@ jobs:
 
           # Start the application
           nohup npm start > app.log 2>&1 &
+
           exit
           EOF
