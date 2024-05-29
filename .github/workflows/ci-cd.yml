@@ -61,19 +61,22 @@ jobs:
             pkill -f "npm start"
           fi
 
+          # Create application directory if it does not exist
+          mkdir -p ~/apps/${APP_NAME}
+
           # Remove old app directory if it exists
-          if [ -d "~/${APP_NAME}" ]; then
-            rm -rf "~/${APP_NAME}"
+          if [ -d "~/apps/${APP_NAME}" ]; then
+            rm -rf "~/apps/${APP_NAME}/*"
           fi
 
           # Unzip the new code
-          unzip -o ~/react-app.zip -d ~/${APP_NAME}
+          unzip -o ~/react-app.zip -d ~/apps/${APP_NAME}
 
           # Change ownership to ec2-user
-          sudo chown -R ec2-user:ec2-user ~/${APP_NAME}
+          sudo chown -R ec2-user:ec2-user ~/apps/${APP_NAME}
 
           # Navigate to the app directory and install dependencies
-          cd ~/${APP_NAME}
+          cd ~/apps/${APP_NAME}
           npm install
 
           # Start the application
