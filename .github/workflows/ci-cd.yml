@@ -1,21 +1,30 @@
 name: CI/CD Pipeline
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-  workflow_dispatch:  # This allows manual triggers
+  workflow_dispatch:  # Trigger on manual workflow dispatch
+    inputs:
+        applicationrepo:
+          description: 'Name of the React application repo'  # What's this input for?
+          required: true  # Is it optional or required?
+        branchOrTagName:
+          description: 'Name of the branch to checkout'
+          required: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Show repository URL
+        run: echo ${{ inputs.applicationrepo }}:${{ inputs.branchOrTagName }}
+        
+      - name: Checkout React App Repository
+        uses: actions/checkout@v3
+        
+        with:
+          repository: ${{ inputs.applicationrepo }}
+          ref: ${{ inputs.branchOrTagName }}
+          token: ${{ secrets.backstage_token }}
 
       - name: Package code as zip
         run: |
