@@ -61,15 +61,13 @@ jobs:
             pkill -f "npm start"
           fi
 
-          # Create application directory if it does not exist
+          # Create the application directory if it doesn't exist
           mkdir -p ~/apps/${APP_NAME}
 
-          # Remove old app directory if it exists
-          if [ -d "~/apps/${APP_NAME}" ]; then
-            rm -rf "~/apps/${APP_NAME}/*"
-          fi
+          # Remove old app directory contents if they exist
+          rm -rf ~/apps/${APP_NAME}/*
 
-          # Unzip the new code
+          # Unzip the new code into the application directory
           unzip -o ~/react-app.zip -d ~/apps/${APP_NAME}
 
           # Change ownership to ec2-user
