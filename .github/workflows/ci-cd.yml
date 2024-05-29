@@ -67,13 +67,10 @@ jobs:
           fi
 
           # Unzip the new code
-          sudo unzip -o ~/react-app.zip -d ~/${APP_NAME}
+          unzip -o ~/react-app.zip -d ~/${APP_NAME}
 
           # Change ownership to ec2-user
-          sudo chown -R ec2-user:ec2-user /home/ec2-user/react-app
-
-          # Move and rename the app directory
-          # mv ~/react-app ~/${APP_NAME}
+          sudo chown -R ec2-user:ec2-user ~/${APP_NAME}
 
           # Navigate to the app directory and install dependencies
           cd ~/${APP_NAME}
