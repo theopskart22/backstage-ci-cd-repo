@@ -3,12 +3,12 @@ name: CI/CD Pipeline
 on:
   workflow_dispatch:  # Trigger on manual workflow dispatch
     inputs:
-        applicationrepo:
-          description: 'Name of the React application repo'  # What's this input for?
-          required: true  # Is it optional or required?
-        branchOrTagName:
-          description: 'Name of the branch to checkout'
-          required: true
+      applicationrepo:
+        description: 'Name of the React application repo'
+        required: true
+      branchOrTagName:
+        description: 'Name of the branch to checkout'
+        required: true
 
 jobs:
   build:
@@ -20,11 +20,14 @@ jobs:
         
       - name: Checkout React App Repository
         uses: actions/checkout@v3
-        
         with:
           repository: ${{ inputs.applicationrepo }}
           ref: ${{ inputs.branchOrTagName }}
           token: ${{ secrets.backstage_token }}
+
+      - name: Extract app name from package.json
+        id: extract_app_name
+        run: echo "APP_NAME=$(jq -r '.name' package.json)" >> $GITHUB_ENV
 
       - name: Package code as zip
         run: |
@@ -50,11 +53,33 @@ jobs:
         env:
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
+          APP_NAME: ${{ env.APP_NAME }}
         run: |
           ssh $EC2_USER@$EC2_HOST << 'EOF'
+          # Stop any existing instance of the application
+          if pgrep -f "npm start" > /dev/null; then
+            pkill -f "npm start"
+          fi
+
+          # Remove old app directory if it exists
+          if [ -d "~/${APP_NAME}" ]; then
+            rm -rf "~/${APP_NAME}"
+          fi
+
+          # Unzip the new code
           sudo unzip -o ~/react-app.zip -d ~/react-app
+
+          # Change ownership to ec2-user
           sudo chown -R ec2-user:ec2-user /home/ec2-user/react-app
-          cd ~/react-app
+
+          # Move and rename the app directory
+          mv ~/react-app ~/${APP_NAME}
+
+          # Navigate to the app directory and install dependencies
+          cd ~/${APP_NAME}
           npm install
-          nohup npm start &
+
+          # Start the application
+          nohup npm start > app.log 2>&1 &
+          exit
           EOF
